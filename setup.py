@@ -65,17 +65,102 @@ if __name__ == '__main__':
             version=version,
             description='OpenPCDet is a general codebase for 3D object detection from point cloud',
             install_requires=[
-                'numpy', 'llvmlite', 'numba', 'tensorboardX', 'easydict',
-                'pyyaml', 'scikit-image', 'tqdm', 'SharedArray'
+                'numpy',
+                'llvmlite',
+                'numba',
+                'tensorboardX',
+                'easydict',
+                'pyyaml',
+                'scikit-image',
+                'tqdm',
+                'SharedArray',
+                # 'spconv',  # spconv has different names depending on the cuda version
             ],
+
             author='Shaoshuai Shi',
             author_email='shaoshuaics@gmail.com',
             license='Apache License 2.0',
             packages=find_packages(exclude=['tools', 'data', 'output']),
+            cmdclass={
+                'build_ext': BuildExtension,
+            },
             ext_modules=[
-                make_cuda_ext(name='iou3d_nms_cuda', module='pcdet.ops.iou3d_nms', sources=[ ... ]),
-                make_cuda_ext(name='roiaware_pool3d_cuda', module='pcdet.ops.roiaware_pool3d', sources=[ ... ]),
-                # Add the rest here
+                make_cuda_ext(
+                    name='iou3d_nms_cuda',
+                    module='pcdet.ops.iou3d_nms',
+                    sources=[
+                        'src/iou3d_cpu.cpp',
+                        'src/iou3d_nms_api.cpp',
+                        'src/iou3d_nms.cpp',
+                        'src/iou3d_nms_kernel.cu',
+                    ]
+                ),
+                make_cuda_ext(
+                    name='roiaware_pool3d_cuda',
+                    module='pcdet.ops.roiaware_pool3d',
+                    sources=[
+                        'src/roiaware_pool3d.cpp',
+                        'src/roiaware_pool3d_kernel.cu',
+                    ]
+                ),
+                make_cuda_ext(
+                    name='roipoint_pool3d_cuda',
+                    module='pcdet.ops.roipoint_pool3d',
+                    sources=[
+                        'src/roipoint_pool3d.cpp',
+                        'src/roipoint_pool3d_kernel.cu',
+                    ]
+                ),
+                make_cuda_ext(
+                    name='pointnet2_stack_cuda',
+                    module='pcdet.ops.pointnet2.pointnet2_stack',
+                    sources=[
+                        'src/pointnet2_api.cpp',
+                        'src/ball_query.cpp',
+                        'src/ball_query_gpu.cu',
+                        'src/group_points.cpp',
+                        'src/group_points_gpu.cu',
+                        'src/sampling.cpp',
+                        'src/sampling_gpu.cu', 
+                        'src/interpolate.cpp', 
+                        'src/interpolate_gpu.cu',
+                        'src/voxel_query.cpp', 
+                        'src/voxel_query_gpu.cu',
+                        'src/vector_pool.cpp',
+                        'src/vector_pool_gpu.cu'
+                    ],
+                ),
+                make_cuda_ext(
+                    name='pointnet2_batch_cuda',
+                    module='pcdet.ops.pointnet2.pointnet2_batch',
+                    sources=[
+                        'src/pointnet2_api.cpp',
+                        'src/ball_query.cpp',
+                        'src/ball_query_gpu.cu',
+                        'src/group_points.cpp',
+                        'src/group_points_gpu.cu',
+                        'src/interpolate.cpp',
+                        'src/interpolate_gpu.cu',
+                        'src/sampling.cpp',
+                        'src/sampling_gpu.cu',
+
+                    ],
+                ),
+                make_cuda_ext(
+                    name="bev_pool_ext",
+                    module="pcdet.ops.bev_pool",
+                    sources=[
+                        "src/bev_pool.cpp",
+                        "src/bev_pool_cuda.cu",
+                    ],
+                ),
+                make_cuda_ext(
+                    name='ingroup_inds_cuda',
+                    module='pcdet.ops.ingroup_inds',
+                    sources=[
+                        'src/ingroup_inds.cpp',
+                        'src/ingroup_inds_kernel.cu',
+                    ]
+                ),
             ],
-            cmdclass={'build_ext': BuildExtension}
         )
